@@ -1,0 +1,1 @@
+export const SMART_CONTRACT_ARC_32 = {};
