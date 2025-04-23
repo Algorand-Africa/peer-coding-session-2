@@ -1,4 +1,4 @@
-export const SMART_CONTRACT_ARC_32 = {
+{
     "hints": {
         "createApplication(uint64)void": {
             "call_config": {
@@ -135,4 +135,4 @@ export const SMART_CONTRACT_ARC_32 = {
         "networks": {}
     },
     "bare_call_config": {}
-};
+}

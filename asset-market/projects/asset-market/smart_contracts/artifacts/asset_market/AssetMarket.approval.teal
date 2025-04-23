@@ -1,0 +1,438 @@
+#pragma version 10
+#pragma typetrack false
+
+// @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
+main:
+    intcblock 0 1 200000 4
+    bytecblock "listingAssetId" "unitPrice"
+    // smart_contracts/asset_market/contract.algo.ts:3
+    // export class AssetMarket extends Contract {
+    txn NumAppArgs
+    bz main_after_if_else@11
+    pushbytess 0x973b616f 0x695f0eaa 0x830ff424 0x91ffd219 0x2487c32c // method "createApplication(uint64)void", method "createAsset(pay)uint64", method "updatePrice(uint64)void", method "purchaseAsset(pay,uint64)void", method "deleteApplication()void"
+    txna ApplicationArgs 0
+    match main_createApplication_route@3 main_createAsset_route@4 main_updatePrice_route@5 main_purchaseAsset_route@6 main_deleteApplication_route@7
+
+main_after_if_else@11:
+    // smart_contracts/asset_market/contract.algo.ts:3
+    // export class AssetMarket extends Contract {
+    intc_0 // 0
+    return
+
+main_deleteApplication_route@7:
+    // smart_contracts/asset_market/contract.algo.ts:72
+    // @abimethod()
+    txn OnCompletion
+    pushint 5 // DeleteApplication
+    ==
+    assert // OnCompletion is not DeleteApplication
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub deleteApplication
+    intc_1 // 1
+    return
+
+main_purchaseAsset_route@6:
+    // smart_contracts/asset_market/contract.algo.ts:54
+    // @abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/asset_market/contract.algo.ts:3
+    // export class AssetMarket extends Contract {
+    txn GroupIndex
+    intc_1 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    txna ApplicationArgs 1
+    btoi
+    // smart_contracts/asset_market/contract.algo.ts:54
+    // @abimethod()
+    callsub purchaseAsset
+    intc_1 // 1
+    return
+
+main_updatePrice_route@5:
+    // smart_contracts/asset_market/contract.algo.ts:43
+    // @abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/asset_market/contract.algo.ts:3
+    // export class AssetMarket extends Contract {
+    txna ApplicationArgs 1
+    btoi
+    // smart_contracts/asset_market/contract.algo.ts:43
+    // @abimethod()
+    callsub updatePrice
+    intc_1 // 1
+    return
+
+main_createAsset_route@4:
+    // smart_contracts/asset_market/contract.algo.ts:23
+    // @abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/asset_market/contract.algo.ts:3
+    // export class AssetMarket extends Contract {
+    txn GroupIndex
+    intc_1 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/asset_market/contract.algo.ts:23
+    // @abimethod()
+    callsub createAsset
+    itob
+    pushbytes 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+main_createApplication_route@3:
+    // smart_contracts/asset_market/contract.algo.ts:13
+    // @abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    !
+    assert // can only call when creating
+    // smart_contracts/asset_market/contract.algo.ts:3
+    // export class AssetMarket extends Contract {
+    txna ApplicationArgs 1
+    btoi
+    // smart_contracts/asset_market/contract.algo.ts:13
+    // @abimethod()
+    callsub createApplication
+    intc_1 // 1
+    return
+
+
+// smart_contracts/asset_market/contract.algo.ts::AssetMarket.createApplication(unitPrice: uint64) -> void:
+createApplication:
+    // smart_contracts/asset_market/contract.algo.ts:13-14
+    // @abimethod()
+    // public createApplication(unitPrice: uint64) {
+    proto 1 0
+    // smart_contracts/asset_market/contract.algo.ts:15
+    // assert(unitPrice > 0, 'Unit price must be greater than 0');
+    frame_dig -1
+    assert // Unit price must be greater than 0
+    // smart_contracts/asset_market/contract.algo.ts:8
+    // unitPrice = GlobalState<uint64>();
+    bytec_1 // "unitPrice"
+    // smart_contracts/asset_market/contract.algo.ts:17
+    // this.unitPrice.value = unitPrice;
+    frame_dig -1
+    app_global_put
+    retsub
+
+
+// smart_contracts/asset_market/contract.algo.ts::AssetMarket.createAsset(mbrTxn: uint64) -> uint64:
+createAsset:
+    // smart_contracts/asset_market/contract.algo.ts:23-24
+    // @abimethod()
+    // public createAsset(mbrTxn: gtxn.PaymentTxn): uint64 {
+    proto 1 1
+    // smart_contracts/asset_market/contract.algo.ts:25
+    // assert(Txn.sender === Global.creatorAddress);
+    txn Sender
+    global CreatorAddress
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:26
+    // assert(mbrTxn.amount >= 200_000, 'Minimum balance must be at least 0.2 algos');
+    frame_dig -1
+    gtxns Amount
+    intc_2 // 200000
+    >=
+    assert // Minimum balance must be at least 0.2 algos
+    // smart_contracts/asset_market/contract.algo.ts:27
+    // assert(mbrTxn.receiver === Global.currentApplicationAddress);
+    frame_dig -1
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:29-33
+    // const response = itxn.assetConfig({
+    //   assetName: 'NAIJA',
+    //   total: 1000,
+    //   decimals: 0,
+    // }).submit();
+    itxn_begin
+    // smart_contracts/asset_market/contract.algo.ts:32
+    // decimals: 0,
+    intc_0 // 0
+    itxn_field ConfigAssetDecimals
+    // smart_contracts/asset_market/contract.algo.ts:31
+    // total: 1000,
+    pushint 1000 // 1000
+    itxn_field ConfigAssetTotal
+    // smart_contracts/asset_market/contract.algo.ts:30
+    // assetName: 'NAIJA',
+    pushbytes "NAIJA"
+    itxn_field ConfigAssetName
+    // smart_contracts/asset_market/contract.algo.ts:29-33
+    // const response = itxn.assetConfig({
+    //   assetName: 'NAIJA',
+    //   total: 1000,
+    //   decimals: 0,
+    // }).submit();
+    pushint 3 // 3
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+    itxn CreatedAssetID
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    bytec_0 // "listingAssetId"
+    // smart_contracts/asset_market/contract.algo.ts:35
+    // this.listingAssetId.value = response.createdAsset.id;
+    dig 1
+    app_global_put
+    // smart_contracts/asset_market/contract.algo.ts:37
+    // return response.createdAsset.id;
+    retsub
+
+
+// smart_contracts/asset_market/contract.algo.ts::AssetMarket.updatePrice(newPrice: uint64) -> void:
+updatePrice:
+    // smart_contracts/asset_market/contract.algo.ts:43-44
+    // @abimethod()
+    // public updatePrice(newPrice: uint64) {
+    proto 1 0
+    // smart_contracts/asset_market/contract.algo.ts:45
+    // assert(newPrice > 0, 'Unit price must be greater than 0');
+    frame_dig -1
+    assert // Unit price must be greater than 0
+    // smart_contracts/asset_market/contract.algo.ts:46
+    // assert(Txn.sender === Global.creatorAddress);
+    txn Sender
+    global CreatorAddress
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:8
+    // unitPrice = GlobalState<uint64>();
+    bytec_1 // "unitPrice"
+    // smart_contracts/asset_market/contract.algo.ts:48
+    // this.unitPrice.value = newPrice;
+    frame_dig -1
+    app_global_put
+    retsub
+
+
+// smart_contracts/asset_market/contract.algo.ts::AssetMarket.purchaseAsset(paymentTxn: uint64, numberOfUnits: uint64) -> void:
+purchaseAsset:
+    // smart_contracts/asset_market/contract.algo.ts:54-55
+    // @abimethod()
+    // public purchaseAsset(paymentTxn: gtxn.PaymentTxn, numberOfUnits: uint64) {
+    proto 2 0
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    // smart_contracts/asset_market/contract.algo.ts:56
+    // assert(this.listingAssetId.hasValue);
+    app_global_get_ex
+    bury 1
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:8
+    // unitPrice = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_1 // "unitPrice"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/asset_market/contract.algo.ts:57
+    // assert(numberOfUnits * this.unitPrice.value === paymentTxn.amount);
+    frame_dig -1
+    *
+    frame_dig -2
+    gtxns Amount
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:58
+    // assert(Txn.sender.isOptedIn(Asset(this.listingAssetId.value)));
+    txn Sender
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/asset_market/contract.algo.ts:58
+    // assert(Txn.sender.isOptedIn(Asset(this.listingAssetId.value)));
+    asset_holding_get AssetBalance
+    bury 1
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:59
+    // assert(paymentTxn.receiver === Global.currentApplicationAddress);
+    frame_dig -2
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:60
+    // assert(paymentTxn.sender === Txn.sender);
+    frame_dig -2
+    gtxns Sender
+    txn Sender
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:62-66
+    // itxn.assetTransfer({
+    //   xferAsset: this.listingAssetId.value,
+    //   assetAmount: numberOfUnits,
+    //   assetReceiver: Txn.sender,
+    // }).submit();
+    itxn_begin
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/asset_market/contract.algo.ts:65
+    // assetReceiver: Txn.sender,
+    txn Sender
+    itxn_field AssetReceiver
+    frame_dig -1
+    itxn_field AssetAmount
+    itxn_field XferAsset
+    // smart_contracts/asset_market/contract.algo.ts:62-66
+    // itxn.assetTransfer({
+    //   xferAsset: this.listingAssetId.value,
+    //   assetAmount: numberOfUnits,
+    //   assetReceiver: Txn.sender,
+    // }).submit();
+    intc_3 // 4
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+    retsub
+
+
+// smart_contracts/asset_market/contract.algo.ts::AssetMarket.deleteApplication() -> void:
+deleteApplication:
+    // smart_contracts/asset_market/contract.algo.ts:74
+    // assert(Txn.sender === Global.creatorAddress);
+    txn Sender
+    global CreatorAddress
+    ==
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    // smart_contracts/asset_market/contract.algo.ts:76
+    // if (this.listingAssetId.hasValue) {
+    app_global_get_ex
+    bury 1
+    bz deleteApplication_after_if_else@3
+    // smart_contracts/asset_market/contract.algo.ts:77
+    // assert(Txn.sender.isOptedIn(Asset(this.listingAssetId.value)));
+    txn Sender
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/asset_market/contract.algo.ts:77
+    // assert(Txn.sender.isOptedIn(Asset(this.listingAssetId.value)));
+    asset_holding_get AssetBalance
+    bury 1
+    assert
+    // smart_contracts/asset_market/contract.algo.ts:79
+    // const assetBalance = Asset(this.listingAssetId.value).balance(Global.currentApplicationAddress);
+    global CurrentApplicationAddress
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/asset_market/contract.algo.ts:79
+    // const assetBalance = Asset(this.listingAssetId.value).balance(Global.currentApplicationAddress);
+    asset_holding_get AssetBalance
+    assert // account opted into asset
+    // smart_contracts/asset_market/contract.algo.ts:81-85
+    // itxn.assetTransfer({
+    //   xferAsset: this.listingAssetId.value,
+    //   assetAmount: assetBalance,
+    //   assetReceiver: Global.creatorAddress,
+    // }).submit();
+    itxn_begin
+    // smart_contracts/asset_market/contract.algo.ts:5
+    // listingAssetId = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "listingAssetId"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/asset_market/contract.algo.ts:84
+    // assetReceiver: Global.creatorAddress,
+    global CreatorAddress
+    itxn_field AssetReceiver
+    itxn_field XferAsset
+    itxn_field AssetAmount
+    // smart_contracts/asset_market/contract.algo.ts:81-85
+    // itxn.assetTransfer({
+    //   xferAsset: this.listingAssetId.value,
+    //   assetAmount: assetBalance,
+    //   assetReceiver: Global.creatorAddress,
+    // }).submit();
+    intc_3 // 4
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+
+deleteApplication_after_if_else@3:
+    // smart_contracts/asset_market/contract.algo.ts:88
+    // const algoBalance: uint64 = Global.currentApplicationAddress.balance - 200_000;
+    global CurrentApplicationAddress
+    acct_params_get AcctBalance
+    assert // account funded
+    intc_2 // 200000
+    -
+    // smart_contracts/asset_market/contract.algo.ts:90-93
+    // itxn.payment({
+    //   receiver: Global.creatorAddress,
+    //   amount: algoBalance
+    // }).submit();
+    itxn_begin
+    // smart_contracts/asset_market/contract.algo.ts:91
+    // receiver: Global.creatorAddress,
+    global CreatorAddress
+    itxn_field Receiver
+    itxn_field Amount
+    // smart_contracts/asset_market/contract.algo.ts:90-93
+    // itxn.payment({
+    //   receiver: Global.creatorAddress,
+    //   amount: algoBalance
+    // }).submit();
+    intc_1 // 1
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+    retsub
